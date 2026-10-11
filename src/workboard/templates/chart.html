@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>__TITLE__ workboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:ital,wght@0,600;1,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one column that reads top-down from the single headline figure, to status, to the six
+   sections, to every row. Colour means status everywhere; sections are told apart by position and label. */
+:root{
+  --bg:#f3f6f8; --surface:#fcfdfe; --ink:#0d1418; --ink-2:#47535e; --muted:#73808b; --line:#dbe2e8; --band:#aab5bf;
+  --st-done:#0ca30c; --st-progress:#2a78d6; --st-ready:#86b6ef; --st-human:#fab219; --st-blocked:#b4bcc4;
+  --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0f13; --surface:#151b21; --ink:#eef2f5; --ink-2:#b9c3cc; --muted:#87939e; --line:#27313b; --band:#55616c;
+    --st-done:#0ca30c; --st-progress:#3987e5; --st-ready:#184f95; --st-human:#fab219; --st-blocked:#3f4a55;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0f13; --surface:#151b21; --ink:#eef2f5; --ink-2:#b9c3cc; --muted:#87939e; --line:#27313b; --band:#55616c;
+  --st-done:#0ca30c; --st-progress:#3987e5; --st-ready:#184f95; --st-human:#fab219; --st-blocked:#3f4a55;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:28px 56px;display:flex;flex-direction:column;gap:36px}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:inherit}
+:focus-visible{outline:2px solid var(--st-progress);outline-offset:2px;border-radius:4px}
+code{font-family:var(--mono);font-size:.88em;overflow-wrap:anywhere}
+a{color:inherit}
+h1,h2{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance;letter-spacing:.01em}
+h1{font-size:30px;line-height:1.1;text-transform:uppercase}
+h2{font-size:22px;text-transform:uppercase}
+.eyebrow{font-family:var(--mono);font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.sub{color:var(--ink-2);margin:2px 0 0;max-width:66ch}
+.head{display:flex;flex-direction:column;gap:6px}
+.sec-head{display:flex;flex-direction:column;gap:2px;margin-bottom:14px}
+
+/* headline */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:center}
+.big{font-family:var(--display);font-style:italic;font-weight:700;font-size:clamp(84px,17vw,150px);line-height:.86;letter-spacing:-.01em}
+.big small{font-size:.42em;font-style:italic}
+.hero-copy{display:flex;flex-direction:column;gap:14px;min-width:0}
+.hero-copy p{margin:0;max-width:52ch}
+.lens{border-top:1px solid var(--line);padding-top:12px;color:var(--ink-2);font-size:14px}
+.lens b{color:var(--ink);font-weight:600}
+.meter{height:6px;border-radius:3px;background:var(--line);margin-top:8px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--st-done);border-radius:3px;min-width:3px}
+.status{display:flex;gap:20px;align-items:center;min-width:0}
+.status svg{width:168px;height:168px;flex:none}
+.legend{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.legend button{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 8px;border-radius:6px;width:100%}
+.legend button:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.legend button[aria-pressed="true"]{background:color-mix(in srgb,var(--ink) 10%,transparent)}
+.legend .n{font-variant-numeric:tabular-nums;font-weight:600}
+.dot{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
+
+/* sections */
+.secs{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px}
+.sec{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:10px;border:1px solid transparent;text-align:center;min-width:0}
+.sec:hover{background:var(--surface)}
+.sec[aria-pressed="true"]{background:var(--surface);border-color:var(--ink)}
+.sec svg{width:100%;max-width:112px;height:auto}
+.sec .k{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.sec .nm{font-weight:600;line-height:1.2}
+.sec .ct{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+
+/* every row */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px;background:var(--surface)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.explore{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}
+.pie{position:relative;min-width:0}
+.pie svg{display:block;width:100%;height:auto;max-width:640px;margin:0 auto}
+.slice{cursor:pointer;transition:opacity .15s}
+.slice.dim{opacity:.16}
+.slice:hover{filter:brightness(1.12)}
+.lbl{font-family:var(--mono);fill:var(--ink-2);pointer-events:none}
+.lbl.dim{opacity:.25}
+.lbl.on{fill:var(--ink);font-weight:600}
+.bandlbl{font-family:var(--body);font-weight:600;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;fill:var(--ink-2)}
+.c-big{font-family:var(--display);font-style:italic;font-weight:700;font-size:54px;fill:var(--ink)}
+.c-sm{font-family:var(--body);font-size:13px;fill:var(--ink-2)}
+.tip{position:absolute;z-index:3;pointer-events:none;background:var(--ink);color:var(--bg);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.35;width:max-content;max-width:min(300px,80%)}
+.tip b{font-family:var(--mono)}
+.tip .t{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-top:3px;opacity:.9}
+.detail{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.detail .id{font-family:var(--mono);font-weight:600;font-size:24px;line-height:1}
+.detail .top{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:space-between}
+.detail p{margin:0;overflow-wrap:anywhere}
+.detail dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:14px}
+.detail dt{color:var(--muted)}
+.detail dd{margin:0;overflow-wrap:anywhere;color:var(--ink-2)}
+.detail .notes{max-height:11.5em;overflow:auto}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;white-space:nowrap}
+.need{font-family:var(--mono);font-size:13px;border:1px solid var(--line);border-radius:5px;padding:0 6px;margin:0 4px 4px 0;display:inline-block}
+button.need:hover{border-color:var(--ink)}
+.hint{font-size:13px;color:var(--muted)}
+
+/* list */
+.list{border:1px solid var(--line);border-radius:12px;background:var(--surface);max-height:520px;overflow:auto}
+.row{display:grid;grid-template-columns:64px minmax(0,1fr) 190px;gap:14px;align-items:start;width:100%;padding:9px 14px;border-bottom:1px solid var(--line);font-size:14px}
+.row:last-child{border-bottom:0}
+.row:hover,.row.on{background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.row .rid{font-family:var(--mono);font-weight:600}
+.row .rt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--ink-2);overflow-wrap:anywhere}
+.count{font-size:13px;color:var(--muted);margin:0 0 8px}
+.foot{font-size:13px;color:var(--ink-2);border-top:1px solid var(--line);padding-top:16px}
+.foot ul{margin:6px 0 0;padding-left:18px;max-width:80ch}
+.foot li{margin-bottom:4px}
+
+@media (max-width:860px){
+  .hero,.explore{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:520px){
+  .wrap{padding-inline:16px}
+  .status{flex-direction:column;align-items:stretch}
+  .status svg{align-self:center}
+  .secs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .row{grid-template-columns:56px minmax(0,1fr)}
+  .row .pill{grid-column:2}
+}
+@media (prefers-reduced-motion:reduce){.slice{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow" id="eyebrow"></div>
+    <h1 id="h1"></h1>
+  </header>
+
+  <section class="hero" aria-label="Overall completion">
+    <div class="hero-copy">
+      <div class="big" id="bigpct"></div>
+      <p id="bigline"></p>
+    </div>
+    <div class="status">
+      <svg id="overall" viewBox="0 0 168 168" role="img" aria-label="Board rows by status"></svg>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>By section</h2>
+      <p class="sub">Pick a section to open it in the chart below.</p>
+    </div>
+    <div class="secs" id="secs"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Every row</h2>
+      <p class="sub">One slice per board row, grouped by section. Hover for the task, click to pin it.</p>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="explore">
+      <div class="pie" id="pie">
+        <svg id="pieSvg" viewBox="32 32 556 556" role="img" aria-label="Every board row, coloured by status"></svg>
+        <div class="tip" id="tip" hidden></div>
+      </div>
+      <aside class="detail" id="detail" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>The rows as a list</h2></div>
+    <p class="count" id="count"></p>
+    <div class="list" id="list"></div>
+  </section>
+
+  <footer class="foot">
+    <b>How this is counted</b>
+    <ul>
+      <li>Completion is rows in the board's Done table divided by all rows. Every row counts the same, whatever its size.</li>
+      <li>Where the board still lists a row that was split into parts, the parent and its parts are each counted.</li>
+      <li>"Ready to start" means the row is unclaimed and everything in its Needs column is in Done. "Waiting on other rows" means at least one need is still open.</li>
+      <li>A finished row filed under two sections is counted in the first.</li>
+    </ul>
+  </footer>
+</div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function(){
+const ITEMS = JSON.parse(document.getElementById('data').textContent);
+const META = __META__;
+const REPO = META.repo;
+const ST = {
+  done:{label:'Done',v:'--st-done'},
+  progress:{label:'In progress',v:'--st-progress'},
+  ready:{label:'Ready to start',v:'--st-ready'},
+  decision:{label:'Needs a human decision',v:'--st-human'},
+  blocked:{label:'Waiting on other rows',v:'--st-blocked'}
+};
+const ORDER = ['done','progress','ready','decision','blocked'];
+const SECS = __SECS__;
+const SECNAME = Object.fromEntries(SECS);
+const byId = Object.fromEntries(ITEMS.map(i=>[i.id,i]));
+ITEMS.forEach((it,n)=>{it.n=n});
+const sorted = ITEMS.slice().sort((a,b)=> SECS.findIndex(s=>s[0]===a.sec)-SECS.findIndex(s=>s[0]===b.sec) || ORDER.indexOf(a.status)-ORDER.indexOf(b.status) || a.n-b.n);
+const state = {sec:null,status:null,pin:(ITEMS.find(i=>i.status==='progress')||ITEMS[0]||{}).id};
+const $ = id=>document.getElementById(id);
+const NS='http://www.w3.org/2000/svg';
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = s=>esc(s).replace(/`([^`]+)`/g,'<code>$1</code>');
+const plain = s=>String(s).replace(/`/g,'');
+const pct = (a,b)=> b? (100*a/b):0;
+const p1 = x=> (Math.round(x*10)/10).toFixed(1);
+const count = (arr)=>{const c={};ORDER.forEach(k=>c[k]=0);arr.forEach(i=>c[i.status]++);return c;};
+const pill = k=>`<span class="pill"><span class="dot" style="background:var(${ST[k].v})"></span>${ST[k].label}</span>`;
+
+function arc(c,r0,r1,a0,a1){
+  if(a1-a0>=360) a1=a0+359.99;
+  const p=(r,a)=>{const t=(a-90)*Math.PI/180;return (c+r*Math.cos(t)).toFixed(2)+','+(c+r*Math.sin(t)).toFixed(2)};
+  const l=(a1-a0)>180?1:0;
+  return `M${p(r1,a0)}A${r1},${r1} 0 ${l} 1 ${p(r1,a1)}L${p(r0,a1)}A${r0},${r0} 0 ${l} 0 ${p(r0,a0)}Z`;
+}
+function el(tag,attrs,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;return e;}
+
+/* small status donut: used for the overall chart and the six sections */
+function donut(svg,counts,size,thick,center,centerSize){
+  svg.textContent='';
+  const c=size/2,total=ORDER.reduce((s,k)=>s+counts[k],0);let a=0;
+  ORDER.forEach(k=>{
+    if(!counts[k])return;
+    const span=360*counts[k]/total;
+    const p=el('path',{d:arc(c,c-thick,c-1,a,a+span),fill:`var(${ST[k].v})`,stroke:'var(--bg)','stroke-width':1.5});
+    p.appendChild(el('title',{},`${ST[k].label}: ${counts[k]} of ${total}`));
+    svg.appendChild(p);a+=span;
+  });
+  if(center) svg.appendChild(el('text',{x:c,y:c,'text-anchor':'middle','dominant-baseline':'central',style:`font-family:var(--display);font-style:italic;font-weight:700;font-size:${centerSize}px;fill:var(--ink)`},center));
+}
+
+/* headline */
+const all=count(ITEMS), total=ITEMS.length;
+document.getElementById('h1').textContent = META.title + ': workboard';
+document.getElementById('eyebrow').innerHTML = (REPO?`<a href="${esc(REPO)}">${esc(REPO.replace(/^https?:\/\/[^/]+\//,''))}</a> · `:'') + esc(META.board) + (META.commit?' at '+esc(META.commit):'') + ' · ' + esc(META.when);
+$('bigpct').innerHTML = p1(pct(all.done,total))+'<small>%</small>';
+$('bigline').innerHTML = `<b>${all.done} of ${total}</b> board rows are done. ${all.progress} ${all.progress===1?'is':'are'} being worked on now, ${all.ready} could be started today, and ${all.blocked} are waiting on rows that are still open.`;
+donut($('overall'),all,168,30,null);
+
+function renderLegend(){
+  $('legend').innerHTML = ORDER.map(k=>`<button type="button" id="lg-${k}" data-k="${k}" aria-pressed="${state.status===k}"><span class="dot" style="background:var(${ST[k].v})"></span><span>${ST[k].label}</span><span class="n">${all[k]}</span></button>`).join('');
+}
+$('legend').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;state.status = state.status===b.dataset.k?null:b.dataset.k;update();});
+
+/* sections */
+$('secs').innerHTML = SECS.map(([k,nm])=>`<button type="button" class="sec" id="sec-${k}" data-k="${k}"><svg viewBox="0 0 112 112" aria-hidden="true"></svg><span class="k">${k}</span><span class="nm">${nm}</span><span class="ct"></span></button>`).join('');
+SECS.forEach(([k])=>{
+  const its=ITEMS.filter(i=>i.sec===k),c=count(its),b=$('sec-'+k);
+  donut(b.querySelector('svg'),c,112,18,Math.round(pct(c.done,its.length))+'%',26);
+  b.querySelector('.ct').textContent=`${c.done} of ${its.length} done`;
+});
+$('secs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;state.sec = state.sec===b.dataset.k?null:b.dataset.k;repin();update();$('chips').scrollIntoView({block:'nearest',behavior:'smooth'});});
+$('chips').innerHTML = `<button type="button" class="chip" id="chip-all" data-k="">All sections</button>`+SECS.map(([k,nm])=>`<button type="button" class="chip" id="chip-${k}" data-k="${k}">${k} ${nm}</button>`).join('');
+$('chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;state.sec=b.dataset.k||null;repin();update();});
+
+/* the big chart */
+const C=310,R0=140,R1=226,RL=234;
+let centerBig,centerSm;
+function centerDefault(){
+  const its=sorted.filter(i=>!state.sec||i.sec===state.sec),c=count(its);
+  centerBig.textContent=Math.round(pct(c.done,its.length))+'%';
+  centerSm.textContent=`${c.done} of ${its.length} done`+(state.sec?` · ${state.sec}`:'');
+}
+function renderPie(){
+  const svg=$('pieSvg');svg.textContent='';
+  const its=sorted.filter(i=>!state.sec||i.sec===state.sec);
+  const groups=SECS.filter(([k])=>its.some(i=>i.sec===k));
+  const gap=groups.length>1?1.6:0, per=(360-gap*groups.length)/its.length;
+  const fs=Math.max(6,Math.min(12,2*Math.PI*RL*per/360*0.86));
+  const defs=el('defs',{});svg.appendChild(defs);
+  let a=gap/2;
+  groups.forEach(([k,nm])=>{
+    const g=its.filter(i=>i.sec===k),a0=a,a1=a+per*g.length;
+    if(groups.length>1){
+      svg.appendChild(el('path',{d:arc(C,R0-12,R0-6,a0,a1),fill:'var(--band)'}));
+      const mid=(a0+a1)/2,flip=mid>90&&mid<270,r=flip?R0-26:R0-18;
+      const pt=x=>{const t=(x-90)*Math.PI/180;return (C+r*Math.cos(t)).toFixed(2)+','+(C+r*Math.sin(t)).toFixed(2)};
+      defs.appendChild(el('path',{id:'bp-'+k,d:flip?`M${pt(a1)}A${r},${r} 0 0 0 ${pt(a0)}`:`M${pt(a0)}A${r},${r} 0 0 1 ${pt(a1)}`}));
+      const len=2*Math.PI*r*(a1-a0)/360, full=k+' '+nm;
+      const txt= len>full.length*7.6?full:(len>22?k:'');
+      if(txt){const t=el('text',{class:'bandlbl'});const tp=el('textPath',{href:'#bp-'+k,startOffset:'50%','text-anchor':'middle'},txt);t.appendChild(tp);svg.appendChild(t);}
+    }
+    g.forEach((it,j)=>{
+      const s0=a0+per*j,s1=s0+per,mid=(s0+s1)/2;
+      const dim=state.status&&it.status!==state.status;
+      svg.appendChild(el('path',{class:'slice'+(dim?' dim':''),d:arc(C,R0,R1,s0,s1),fill:`var(${ST[it.status].v})`,stroke:'var(--bg)','stroke-width':its.length>60?1:2,'data-id':it.id}));
+      if(it.id===state.pin) svg.appendChild(el('path',{d:arc(C,R1+2,R1+5,s0,s1),fill:'var(--ink)'}));
+      const t=(mid-90)*Math.PI/180,x=C+RL*Math.cos(t),y=C+RL*Math.sin(t),right=mid<=180;
+      svg.appendChild(el('text',{class:'lbl'+(dim?' dim':'')+(it.id===state.pin?' on':''),x:x.toFixed(2),y:y.toFixed(2),'font-size':fs.toFixed(1),'text-anchor':right?'start':'end','dominant-baseline':'central',transform:`rotate(${(right?mid-90:mid+90).toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)})`},it.id));
+    });
+    a=a1+gap;
+  });
+  centerBig=el('text',{class:'c-big',x:C,y:C-8,'text-anchor':'middle','dominant-baseline':'central'});
+  centerSm=el('text',{class:'c-sm',x:C,y:C+30,'text-anchor':'middle'});
+  svg.appendChild(centerBig);svg.appendChild(centerSm);centerDefault();
+}
+const tip=$('tip'),pie=$('pie');
+$('pieSvg').addEventListener('pointermove',e=>{
+  const s=e.target.closest('.slice');
+  if(!s||e.pointerType==='touch'){tip.hidden=true;if(centerBig)centerDefault();return;}
+  const it=byId[s.dataset.id];
+  centerBig.textContent=it.id;centerSm.textContent=ST[it.status].label;
+  tip.innerHTML=`<b>${esc(it.id)}</b> · ${ST[it.status].label}<div class="t">${esc(plain(it.task))}</div>`;
+  tip.hidden=false;
+  const r=pie.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;
+  let x=e.clientX-r.left+14,y=e.clientY-r.top+14;
+  if(x+w>r.width)x=Math.max(0,e.clientX-r.left-w-14);
+  if(y+h>r.height)y=Math.max(0,e.clientY-r.top-h-14);
+  tip.style.left=x+'px';tip.style.top=y+'px';
+});
+$('pieSvg').addEventListener('pointerleave',()=>{tip.hidden=true;if(centerBig)centerDefault();});
+$('pieSvg').addEventListener('click',e=>{const s=e.target.closest('.slice');if(!s)return;state.pin=s.dataset.id;update();});
+
+/* pinned row */
+function renderDetail(){
+  const it=byId[state.pin],d=$('detail');
+  if(!it){d.innerHTML='<p class="hint">Click a slice or a row to see it here.</p>';return;}
+  const needs=(it.needs||'').split(',').map(s=>s.trim()).filter(Boolean).map(n=>{
+    const open=it.blockers.includes(n), mark=open?'open':'done';
+    return byId[n]?`<button type="button" class="need" data-pin="${esc(n)}">${esc(n)} · ${mark}</button>`:`<span class="need">${esc(n)} · ${mark}</span>`;
+  }).join('');
+  let rows=`<dt>Section</dt><dd>${esc(it.secraw||it.sec)} ${it.secraw&&it.secraw.includes('/')?'':esc(SECNAME[it.sec])}</dd>`;
+  if(it.status!=='done') rows+=`<dt>Needs</dt><dd>${needs||'Nothing'}</dd>`;
+  if(it.area) rows+=`<dt>Area</dt><dd>${esc(it.area)}</dd>`;
+  if(it.who) rows+=`<dt>${it.status==='done'?'By':'Claimed by'}</dt><dd>${esc(it.who)}</dd>`;
+  if(it.date) rows+=`<dt>Finished</dt><dd>${esc(it.date)} · ${REPO&&it.commit?`<a href="${esc(REPO)}/commit/${esc(it.commit)}"><code>${esc(it.commit)}</code></a>`:`<code>${esc(it.commit||'')}</code>`}</dd>`;
+  if(it.notes) rows+=`<dt>Notes</dt><dd class="notes">${fmt(it.notes)}</dd>`;
+  d.innerHTML=`<div class="top"><span class="id">${esc(it.id)}</span>${pill(it.status)}</div><p>${fmt(it.task)}</p><dl>${rows}</dl>`;
+}
+$('detail').addEventListener('click',e=>{const b=e.target.closest('[data-pin]');if(!b)return;state.pin=b.dataset.pin;if(state.sec&&byId[state.pin].sec!==state.sec)state.sec=null;update();});
+
+/* list */
+function renderList(){
+  const its=sorted.filter(i=>(!state.sec||i.sec===state.sec)&&(!state.status||i.status===state.status));
+  $('count').textContent=`${its.length} of ${total} rows`+(state.sec?` · ${state.sec} ${SECNAME[state.sec]}`:'')+(state.status?` · ${ST[state.status].label}`:'');
+  $('list').innerHTML=its.map(it=>`<button type="button" class="row${it.id===state.pin?' on':''}" id="row-${esc(it.id)}" data-id="${esc(it.id)}"><span class="rid">${esc(it.id)}</span><span class="rt">${fmt(it.task)}</span>${pill(it.status)}</button>`).join('')||'<p class="hint" style="padding:14px;margin:0">No rows match.</p>';
+}
+$('list').addEventListener('click',e=>{const b=e.target.closest('.row');if(!b)return;state.pin=b.dataset.id;update();$('detail').scrollIntoView({block:'nearest',behavior:'smooth'});});
+
+function repin(){if(state.sec&&byId[state.pin]&&byId[state.pin].sec!==state.sec)state.pin=sorted.find(i=>i.sec===state.sec).id;}
+function update(){
+  renderLegend();
+  SECS.forEach(([k])=>{$('sec-'+k).setAttribute('aria-pressed',state.sec===k);$('chip-'+k).setAttribute('aria-pressed',state.sec===k);});
+  $('chip-all').setAttribute('aria-pressed',!state.sec);
+  renderPie();renderDetail();renderList();
+}
+update();
+})();
+</script>
+</body>
+</html>

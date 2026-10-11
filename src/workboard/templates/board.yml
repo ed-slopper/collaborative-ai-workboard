@@ -1,0 +1,17 @@
+name: Board
+on:
+  push:
+    paths: ["WORK.md", "workboard.toml"]
+  pull_request:
+    paths: ["WORK.md", "workboard.toml"]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Point this at wherever collaborative-ai-workboard is hosted.
+      - run: pip install git+https://github.com/OWNER/collaborative-ai-workboard
+      - run: board check

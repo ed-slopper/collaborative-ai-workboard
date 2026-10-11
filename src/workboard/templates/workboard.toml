@@ -1,0 +1,9 @@
+# Settings for the `board` command. Every line is optional.
+title = "{{title}}"
+board = "WORK.md"
+remote = "origin"
+branch = "main"
+# repo_url = "https://github.com/you/project"   # makes commit hashes in the chart clickable
+# who = "you/agent"                             # default for --who
+stale_days = 2                                  # `board check` warns about older claims
+decision_areas = ["humans"]                     # Areas that only a person may take
